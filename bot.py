@@ -1,6 +1,7 @@
 import os
 import discord
 import responses
+import tz
 from dotenv import load_dotenv
 from discord.ext import commands
 
@@ -19,32 +20,18 @@ async def send_message(message, user_message, is_private):
 def run_discord_bot():
     intents = discord.Intents.default()
     intents.message_content = True
-    client = commands.Bot(intents = intents, command_prefix='sudo ')
+    bot = commands.Bot(intents = intents, command_prefix="!")
 
-    @client.event
+    @bot.event
     async def on_ready():
-        print(f'{client.user} is now running!')
+        print(f'{bot.user} is now running!')
 
-    @client.event
-    async def on_message(message):
-        # Make sure bot doesn't get stuck in an infinite loop
-        if message.author == client.user:
-            return
+    @bot.command(name='ping', help='Plays ping pong!')
+    async def ping(ctx):
+        await ctx.send('Pong!')
 
-        # Get data about the user
-        username = str(message.author)
-        user_message = str(message.content)
-        channel = str(message.channel)
-
-        # Debug printing
-        print(f"{username} said: '{user_message}' ({channel})")
-
-        # If the user message contains a '?' in front of the text, it becomes a private message
-        if user_message[0] == '?':
-            user_message = user_message[1:]  # [1:] Removes the '?'
-            await send_message(message, user_message, is_private=True)
-        else:
-            await send_message(message, user_message, is_private=False)
-
-    # Remember to run your bot with your personal TOKEN
-    client.run(TOKEN)
+    @bot.command(name='timezone', help='displays various timezones')
+    async def timezone(ctx):
+        message = tz.timezones()
+        await ctx.send(message)
+    bot.run(TOKEN)
