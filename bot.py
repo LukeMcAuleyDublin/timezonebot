@@ -1,47 +1,50 @@
-# bot.py
 import os
-
 import discord
-from discord.ext import commands
+import responses
 from dotenv import load_dotenv
+from discord.ext import commands
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-GUILD = os.getenv('DISCORD_GUILD')
+# Send messages
+async def send_message(message, user_message, is_private):
+    try:
+        response = responses.handle_response(user_message)
+        await message.author.send(response) if is_private else await message.channel.send(response)
 
-intents = discord.Intents.default()
-client = discord.Client(intents=intents)
-
-@client.event
-async def on_ready():
-	print("Logged in as a bot {0.user}".format(client))
-
-@client.event
-async def on_message(message):
-	username = str(message.author).split("#")[0]
-	channel = str(message.channel.name)
-	user_message = str(message.content)
-
-	print(f'Message {user_message} by {username} on {channel}')
-    
-
-	if message.author == client:
-		return
-
-	if channel == "bot-channel":
-		if user_message.lower() == "hello" or user_message.lower() == "hi":
-			await message.channel.send(f'Hello {username}')
-			return
-		elif user_message.lower() == "bye":
-			await message.channel.send(f'Bye {username}')
-		elif user_message.lower() == "tell me a joke":
-			jokes = [" Can someone please shed more\
-			light on how my lamp got stolen?",
-					"Why is she called llene? She\
-					stands on equal legs.",
-					"What do you call a gazelle in a \
-					lions territory? Denzel."]
-			await message.channel.send(random.choice(jokes))
+    except Exception as e:
+        print(e)
 
 
-client.run(TOKEN)
+def run_discord_bot():
+    intents = discord.Intents.default()
+    intents.message_content = True
+    client = commands.Bot(intents = intents, command_prefix='sudo ')
+
+    @client.event
+    async def on_ready():
+        print(f'{client.user} is now running!')
+
+    @client.event
+    async def on_message(message):
+        # Make sure bot doesn't get stuck in an infinite loop
+        if message.author == client.user:
+            return
+
+        # Get data about the user
+        username = str(message.author)
+        user_message = str(message.content)
+        channel = str(message.channel)
+
+        # Debug printing
+        print(f"{username} said: '{user_message}' ({channel})")
+
+        # If the user message contains a '?' in front of the text, it becomes a private message
+        if user_message[0] == '?':
+            user_message = user_message[1:]  # [1:] Removes the '?'
+            await send_message(message, user_message, is_private=True)
+        else:
+            await send_message(message, user_message, is_private=False)
+
+    # Remember to run your bot with your personal TOKEN
+    client.run(TOKEN)
