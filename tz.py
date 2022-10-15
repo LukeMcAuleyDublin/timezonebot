@@ -1,20 +1,38 @@
 from datetime import datetime
 import pytz
-import csv
 
-current_times = {
-    'America/New_York': lambda t: datetime.now(pytz.timezone(t)).strftime("%Y-%m-%d - %H:%M:%S"),
-    'Europe/Dublin': lambda t: datetime.now(pytz.timezone(t)).strftime("%Y-%m-%d - %H:%M:%S"),
-    'Asia/Phnom_Penh': lambda t: datetime.now(pytz.timezone(t)).strftime("%Y-%m-%d - %H:%M:%S"),
-}
+user_timezones = []
+
+current_times = {}
 
 def timezones():
-    string_to_send = ""
+    string_to_send = "```"
     for k, v in current_times.items():
         print(f"{k}: {v(k)}")
-        string_to_send += f"```\n{k}: {v(k)}\n```"
+        string_to_send += f"\n{k}: {v(k)}\n"
+    string_to_send += '```'
     return string_to_send
 
-# with open("timezones.csv", "w") as f:
-#     csvwriter = csv.writer(f)
-#     csvwriter.writerow(pytz.all_timezones)
+def timezone_in_list(tz):
+    with open('timezones.txt', 'r') as f:
+        for line in f:
+            if tz in line:
+                return True
+    return False
+
+def add_timezone(tz):
+    if timezone_in_list(str(pytz.timezone(tz))) == False:
+        user_timezones.append(tz)
+
+def populate_current_times():
+    for tz in user_timezones:
+        current_times[tz] = lambda t: datetime.now(pytz.timezone(t)).strftime("%Y-%m-%d - %H:%M:%S")
+
+add_timezone('Asia/Tokyo')
+add_timezone('Europe/Dublin')
+
+populate_current_times()
+
+print(user_timezones)
+print(timezones())
+
