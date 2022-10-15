@@ -34,4 +34,8 @@ def run_discord_bot():
     async def timezone(ctx):
         message = tz.timezones()
         await ctx.send(message)
+
+    @bot.command(name='addtimezone', help='adds a timezone to the list of timezones to display')
+    async def addtimezone(ctx):
+        tz.user_timezones.append(ctx.message.content)
     bot.run(TOKEN)
