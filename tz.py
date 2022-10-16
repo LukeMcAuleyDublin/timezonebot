@@ -3,7 +3,12 @@ import pytz
 
 user_timezones = []
 
-current_times = {}
+current_times = {
+    '@Luke & @Jack': lambda t: datetime.now(pytz.timezone('Europe/Dublin')).strftime("%Y-%m-%d - %H:%M:%S"),
+    '@Samnang': lambda t: datetime.now(pytz.timezone('Asia/Phnom_Penh')).strftime("%Y-%m-%d - %H:%M:%S"),
+    '@Umut': lambda t: datetime.now(pytz.timezone('Europe/Istanbul')).strftime("%Y-%m-%d - %H:%M:%S"),
+    '@Taproot': lambda t: datetime.now(pytz.timezone('America/Los_Angeles')).strftime("%Y-%m-%d - %H:%M:%S")
+}
 
 def timezones():
     string_to_send = "```"
